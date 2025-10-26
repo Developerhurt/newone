@@ -1,0 +1,136 @@
+{
+  "accountTypes": {
+    "guest": {
+      "id": "guest",
+      "name": "Guest/Jobseeker",
+      "description": "Job seeker looking for employment opportunities",
+      "icon": "User",
+      "color": "#3B82F6",
+      "defaultRoute": "/guest-view-profile",
+      "editRoute": "/guest-edit-profile",
+      "features": [
+        "job_search",
+        "job_application",
+        "profile_viewing",
+        "event_booking",
+        "content_posting",
+        "user_following"
+      ],
+      "restrictions": [
+        "no_job_creation",
+        "no_artist_hiring",
+        "limited_messaging"
+      ]
+    },
+    "business": {
+      "id": "business",
+      "name": "Business/Company",
+      "description": "Companies looking to hire talent and promote services",
+      "icon": "Building2",
+      "color": "#10B981",
+      "defaultRoute": "/business-view-profile",
+      "editRoute": "/business-edit-profile",
+      "features": [
+        "job_creation",
+        "artist_hiring",
+        "event_creation",
+        "profile_management",
+        "unlimited_messaging",
+        "analytics_dashboard"
+      ],
+      "restrictions": [
+        "requires_subscription",
+        "business_email_verification"
+      ]
+    },
+    "artist": {
+      "id": "artist",
+      "name": "Artist/Creative",
+      "description": "Creative professionals showcasing work and seeking opportunities",
+      "icon": "Palette",
+      "color": "#8B5CF6",
+      "defaultRoute": "/artist-view-profile",
+      "editRoute": "/artist-edit-profile",
+      "features": [
+        "portfolio_showcase",
+        "job_application",
+        "collaboration_creation",
+        "event_creation",
+        "skill_showcase",
+        "verification_badge"
+      ],
+      "restrictions": [
+        "no_job_creation",
+        "no_artist_hiring"
+      ]
+    }
+  },
+  "features": {
+    "hubCoins": {
+      "enabled": true,
+      "socialMediaClick": 30,
+      "jobApplication": 50,
+      "eventBooking": 25,
+      "messageSend": 10
+    },
+    "verification": {
+      "enabled": true,
+      "badges": ["Verified", "Premium", "Elite", "Enterprise"]
+    },
+    "messaging": {
+      "enabled": true,
+      "requiresSubscription": true
+    },
+    "fileUpload": {
+      "maxSize": "10MB",
+      "imageFormats": ["jpg", "jpeg", "png", "gif"],
+      "documentFormats": ["pdf", "doc", "docx"],
+      "videoFormats": ["mp4", "mov"]
+    }
+  },
+  "validation": {
+    "businessEmail": {
+      "pattern": "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$",
+      "businessDomains": true,
+      "message": "Only business domain emails are accepted"
+    },
+    "personalEmail": {
+      "pattern": "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$",
+      "message": "Please enter a valid email address"
+    },
+    "phone": {
+      "pattern": "^\\+?[1-9]\\d{1,14}$",
+      "message": "Please enter a valid phone number"
+    }
+  },
+  "industries": [
+    "IT Industry",
+    "Manufacturing",
+    "Healthcare",
+    "Education",
+    "Finance",
+    "Entertainment",
+    "Retail",
+    "Real Estate",
+    "Transportation",
+    "Telecommunications"
+  ],
+  "companyTypes": [
+    "Private Limited",
+    "Public Limited",
+    "Partnership",
+    "Sole Proprietorship",
+    "LLC",
+    "Corporation",
+    "Non-Profit",
+    "Government"
+  ],
+  "employeeRanges": [
+    "1-10",
+    "10-50",
+    "50-100",
+    "100-500",
+    "500-1000",
+    "1000+"
+  ]
+}

@@ -1,0 +1,131 @@
+{
+  "guest": {
+    "sections": [
+      {
+        "label": "Main Menu",
+        "items": [
+          { "title": "View profile", "url": "/guest-view-profile", "icon": "User" },
+          { "title": "Edit profile", "url": "/guest-edit-profile", "icon": "Edit3" },
+          { "title": "Bookings", "url": "/bookings", "icon": "Calendar" },
+          { "title": "Search Jobs", "url": "/jobs", "icon": "Search" },
+          { "title": "Subscriptions & packages", "url": "/subscriptions", "icon": "CreditCard" },
+          { "title": "Events", "url": "/events", "icon": "CalendarDays" },
+          { "title": "Find artist", "url": "/find-artist", "icon": "Search" },
+          { "title": "Find business", "url": "/find-business", "icon": "Building2" },
+          { "title": "Hire an Artist groups", "url": "/hire-artists-groups", "icon": "Users" },
+          { "title": "Privacy policy", "url": "/privacy", "icon": "Shield" },
+          { "title": "Post content", "url": "/posts", "icon": "Edit3" },
+          { "title": "Followers & connections", "url": "/followers", "icon": "Users" },
+          { "title": "Hub coins", "url": "/coins", "icon": "CreditCard" },
+          { "title": "Post images & videos", "url": "/create-post", "icon": "Image" }
+        ]
+      },
+      {
+        "label": "Support & About",
+        "items": [
+          { "title": "Help & support", "url": "/support", "icon": "HelpCircle" },
+          { "title": "Terms & policies", "url": "/terms", "icon": "FileCheck" }
+        ]
+      },
+      {
+        "label": "Actions",
+        "items": [
+          { "title": "FAQ", "url": "/faq", "icon": "HelpCircle" },
+          { "title": "Log out", "url": "/logout", "icon": "LogOut" },
+          { "title": "Refer & earn up to 10000", "url": "/refer", "icon": "Gift" }
+        ]
+      }
+    ]
+  },
+  "business": {
+    "sections": [
+      {
+        "label": "Menu",
+        "items": [
+          { "title": "View profile", "url": "/business-view-profile", "icon": "User" },
+          { "title": "Edit Profile", "url": "/business-edit-profile", "icon": "Edit3" },
+          { "title": "Bookings", "url": "/business-bookings", "icon": "Calendar" },
+          { "title": "My post", "url": "/business-my-posts", "icon": "Image" },
+          { "title": "Find Artist", "url": "/business-find-artist", "icon": "Search" },
+          { "title": "Find Business", "url": "/find-business", "icon": "Building2" },
+          { "title": "Hire An Artist", "url": "/hire-artist", "icon": "Users" },
+          { "title": "Hire an Artist Group", "url": "/hire-artists-groups", "icon": "Users" },
+          { "title": "Subscription", "url": "/subscriptions", "icon": "CreditCard" },
+          { "title": "Events (Create & Book)", "url": "/events", "icon": "CalendarDays" },
+          { "title": "JOBS (Hire an Artist)", "url": "/jobs", "icon": "Briefcase" },
+          { "title": "JOBS (Post A job)", "url": "/jobs", "icon": "Briefcase" },
+          { "title": "Chat", "url": "/chat", "icon": "MessageCircle" },
+          { "title": "Privacy", "url": "/privacy", "icon": "Shield" },
+          { "title": "Packages & subscription", "url": "/packages", "icon": "CreditCard" }
+        ]
+      },
+      {
+        "label": "Support & About",
+        "items": [
+          { "title": "My Subscription", "url": "/my-subscriptions", "icon": "CreditCard" },
+          { "title": "Help & Support", "url": "/support", "icon": "HelpCircle" },
+          { "title": "Terms & Policies", "url": "/terms", "icon": "FileCheck" }
+        ]
+      },
+      {
+        "label": "Actions",
+        "items": [
+          { "title": "FAQ", "url": "/faq", "icon": "HelpCircle" },
+          { "title": "Logout", "url": "/logout", "icon": "LogOut" }
+        ]
+      }
+    ]
+  },
+  "artist": {
+    "sections": [
+      {
+        "label": "Profile & Account",
+        "items": [
+          { "title": "View profile", "url": "/artist-view-profile", "icon": "User" },
+          { "title": "Edit profile", "url": "/artist-edit-profile", "icon": "Edit3" },
+          { "title": "Bookings", "url": "/bookings", "icon": "Calendar" },
+          { "title": "Applied jobs", "url": "/applied-jobs", "icon": "FileText" },
+          { "title": "Events", "url": "/events", "icon": "CalendarDays" },
+          { "title": "My post", "url": "/posts", "icon": "Image" }
+          
+
+        ]
+      },
+      {
+        "label": "",
+        "items": [
+          { "title": "Find artist", "url": "/find-artist", "icon": "Search" },
+          { "title": "Find business", "url": "/find-business", "icon": "Building2" },
+          { "title": "Hire artist groups", "url": "/hire-artists-groups", "icon": "Users" },
+          { "title": "Artist collaborations", "url": "/collaborations", "icon": "Handshake" },
+          { "title": "View collabs", "url": "/view-collaborations", "icon": "Eye" },
+          { "title": "Privacy", "url": "/privacy", "icon": "Shield" },
+          { "title": "Packages & subscription", "url": "/packages", "icon": "CreditCard" },
+          { "title": "Chat", "url": "/chat", "icon": "MessageCircle" },
+          {"title": "Account", "url": "/account", "icon": "Settings"}
+        ]
+      },
+      {
+        "label": "Support & About",
+        "items": [
+          
+          { "title": "My Subscriptions", "url": "/privacy", "icon": "Shield" },
+          { "title": "Help & support", "url": "/support", "icon": "HelpCircle" },
+         
+          { "title": "Terms & policies", "url": "/terms", "icon": "FileCheck" }
+        ]
+      },
+      {
+        "label": "Account Actions",
+        "items": [
+          { "title": "FAQ", "url": "/faq", "icon": "HelpCircle" },
+          
+          { "title": "Log out", "url": "/logout", "icon": "LogOut" },
+          { "title": "Refer & earn up to 10000 (Refer now)", "url": "/refer", "icon": "Gift" }
+        ]
+      }
+    ]
+  }
+}
+
+
