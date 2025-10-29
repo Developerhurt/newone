@@ -6,7 +6,7 @@ import axios from "axios";
 import { useRouter } from "next/navigation";
 
 export default function Signup() {
- const router = useRouter();
+   const router = useRouter();
   const [accountType, setAccountType] = useState("artist");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ text: "", type: "" });
@@ -23,8 +23,9 @@ export default function Signup() {
     companycategory: "",
   });
 
-  const handleChange = (e) =>
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+
+  const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -32,11 +33,7 @@ export default function Signup() {
     setMessage({ text: "", type: "" });
 
     try {
-      await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/signup`, {
-        ...formData,
-        accountType,
-      });
-
+      await axios.post(`${API_URL}/api/auth/signup`, { ...formData, accountType }, { timeout: 10000 });
       setMessage({ text: "Account created successfully!", type: "success" });
 
       setFormData({
@@ -52,17 +49,15 @@ export default function Signup() {
         companycategory: "",
       });
 
-      setTimeout(() => router.push("/login"), 1500);
+      setTimeout(() => router.push("/login"), 1200);
     } catch (error) {
-      setMessage({
-        text: error.response?.data?.message || "Something went wrong!",
-        type: "error",
-      });
+      console.error("Signup error (frontend):", error?.response?.data || error.message || error);
+      setMessage({ text: error.response?.data?.message || "Something went wrong!", type: "error" });
     } finally {
       setLoading(false);
     }
   };
-
+  
   const fade = {
     hidden: { opacity: 0, y: 40 },
     visible: { opacity: 1, y: 0 },
