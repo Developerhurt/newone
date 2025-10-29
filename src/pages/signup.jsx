@@ -6,7 +6,7 @@ import axios from "axios";
 import { useRouter } from "next/navigation";
 
 export default function Signup() {
-   const router = useRouter();
+  const router = useRouter();
   const [accountType, setAccountType] = useState("artist");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ text: "", type: "" });
@@ -25,7 +25,8 @@ export default function Signup() {
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
-  const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
+  const handleChange = (e) =>
+    setFormData({ ...formData, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -33,9 +34,16 @@ export default function Signup() {
     setMessage({ text: "", type: "" });
 
     try {
-      await axios.post(`${API_URL}/api/auth/signup`, { ...formData, accountType }, { timeout: 10000 });
+      // ✅ Send signup data (no JWT involved)
+      await axios.post(
+        `${API_URL}/api/auth/signup`,
+        { ...formData, accountType },
+        { timeout: 10000 }
+      );
+
       setMessage({ text: "Account created successfully!", type: "success" });
 
+      // ✅ Reset form after success
       setFormData({
         name: "",
         email: "",
@@ -49,15 +57,19 @@ export default function Signup() {
         companycategory: "",
       });
 
+      // ✅ Redirect to login after short delay
       setTimeout(() => router.push("/login"), 1200);
     } catch (error) {
-      console.error("Signup error (frontend):", error?.response?.data || error.message || error);
-      setMessage({ text: error.response?.data?.message || "Something went wrong!", type: "error" });
+      console.error("Signup error (frontend):", error?.response?.data || error.message);
+      setMessage({
+        text: error.response?.data?.message || "Something went wrong!",
+        type: "error",
+      });
     } finally {
       setLoading(false);
     }
   };
-  
+
   const fade = {
     hidden: { opacity: 0, y: 40 },
     visible: { opacity: 1, y: 0 },
@@ -66,13 +78,13 @@ export default function Signup() {
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white">
-      {/* Left Side - Form Area */}
+      {/* Left Side - Signup Form */}
       <div className="flex-1 flex flex-col justify-center px-8 md:px-16 py-10">
         <h1 className="text-4xl font-bold mb-8 text-blue-400">
           Create Your Account
         </h1>
 
-        {/* Account Type Buttons */}
+        {/* Account Type Selector */}
         <div className="flex gap-3 mb-8 flex-wrap">
           {["artist", "professional", "guest", "admin"].map((type) => (
             <motion.button
@@ -103,8 +115,8 @@ export default function Signup() {
             onSubmit={handleSubmit}
             className="space-y-4"
           >
-            {/* Grid for 2-column layout */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Basic Info */}
               <div>
                 <label className="block mb-1">Full Name</label>
                 <input
@@ -151,7 +163,7 @@ export default function Signup() {
                 />
               </div>
 
-              {/* Artist-specific fields */}
+              {/* Artist Fields */}
               {accountType === "artist" && (
                 <>
                   <div>
@@ -176,7 +188,7 @@ export default function Signup() {
                 </>
               )}
 
-              {/* Professional-specific fields */}
+              {/* Professional Fields */}
               {accountType === "professional" && (
                 <>
                   <div>
@@ -209,7 +221,7 @@ export default function Signup() {
                 </>
               )}
 
-              {/* Description (full width) */}
+              {/* Common Description Field */}
               <div className="md:col-span-2">
                 <label className="block mb-1">Description</label>
                 <textarea
@@ -234,9 +246,7 @@ export default function Signup() {
             {message.text && (
               <p
                 className={`text-center mt-3 font-medium ${
-                  message.type === "error"
-                    ? "text-red-400"
-                    : "text-green-400"
+                  message.type === "error" ? "text-red-400" : "text-green-400"
                 }`}
               >
                 {message.text}
@@ -245,7 +255,7 @@ export default function Signup() {
           </motion.form>
         </AnimatePresence>
 
-        {/* Already have account? */}
+        {/* Redirect to Login */}
         <p className="text-sm mt-4 text-center text-gray-400">
           Already have an account?{" "}
           <span
@@ -257,7 +267,7 @@ export default function Signup() {
         </p>
       </div>
 
-      {/* Right Side - Animated Background */}
+      {/* Right Side Animated Visuals */}
       <div className="hidden md:flex flex-1 items-center justify-center relative overflow-hidden">
         <motion.div
           animate={{ y: [0, -30, 0], rotate: [0, 10, 0] }}

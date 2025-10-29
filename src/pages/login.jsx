@@ -11,6 +11,7 @@ export default function LoginPage() {
   const [message, setMessage] = useState({ text: "", type: "" });
   const [loading, setLoading] = useState(false);
 
+  // ✅ Use your deployed backend URL or fallback to localhost
   const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
   const handleLogin = async (e) => {
@@ -19,18 +20,19 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
+      // ✅ Send simple login request — backend no longer uses JWT
       const res = await axios.post(`${API_URL}/api/auth/login`, { email, password }, { timeout: 10000 });
       const userData = res.data;
 
       setMessage({ text: "Login successful! Redirecting...", type: "success" });
 
-      // Redirect based on role (relative paths — correct for both localhost & production)
+      // ✅ Redirect user based on their account type
       switch (userData.accountType) {
         case "admin":
           router.push("/dashboard");
           break;
         case "guest":
-          router.push("/");
+          router.push("/dashboard");
           break;
         case "artist":
           router.push("/artist/dashboard");
@@ -52,6 +54,7 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row">
+      {/* Left animation section */}
       <motion.div
         className="md:w-1/2 flex items-center justify-center bg-gradient-to-br from-indigo-400 via-purple-400 to-pink-400"
         initial={{ opacity: 0 }}
@@ -65,6 +68,7 @@ export default function LoginPage() {
         />
       </motion.div>
 
+      {/* Right login form */}
       <div className="md:w-1/2 flex items-center justify-center p-10 bg-white">
         <form onSubmit={handleLogin} className="w-full max-w-md space-y-6">
           <h1 className="text-4xl font-bold text-indigo-700">Welcome Back 👋</h1>
