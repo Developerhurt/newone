@@ -10,34 +10,50 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState({ text: "", type: "" });
   const [loading, setLoading] = useState(false);
-  const [checkingAuth, setCheckingAuth] = useState(true); // ✅ Prevent flicker
+  const [checkingAuth, setCheckingAuth] = useState(true);
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
+  // ✅ Auto logout after 15 seconds
+  const startTokenTimer = () => {
+    setTimeout(() => {
+      localStorage.removeItem("token");
+      localStorage.removeItem("userData");
+      alert("⚠️ Session expired. Please log in again.");
+      router.push("/login");
+    }, 15000);
+  };
+
   useEffect(() => {
-    // ✅ Only run client-side
     if (typeof window !== "undefined") {
       const token = localStorage.getItem("token");
       const userData = localStorage.getItem("userData");
+
       if (token && userData) {
         const parsed = JSON.parse(userData);
-        // ✅ Wait a short delay to prevent router conflicts
+        console.log("🔍 Loaded user:", parsed);
+        startTokenTimer();
         setTimeout(() => redirectUser(parsed), 500);
       }
     }
     setCheckingAuth(false);
   }, []);
 
+  // ✅ Correct role-based redirect
   const redirectUser = (userData) => {
     if (!userData) return;
-    const { accountType } = userData;
+
+    // accountType is inside userData.user
+    const accountType = userData.user?.accountType?.toLowerCase() || "";
+
+    console.log("➡️ Redirecting account type:", accountType);
 
     switch (accountType) {
       case "admin":
-        router.push("/dashboard");
+        router.push("/admin/dashboard");
         break;
       case "guest":
-        router.push("/dashboard");
+        router.push("/guest/dashboard");
         break;
       case "artist":
         router.push("/artist/dashboard");
@@ -58,18 +74,20 @@ export default function LoginPage() {
     try {
       const res = await axios.post(`${API_URL}/api/auth/login`, { email, password });
       const userData = res.data;
-      console.log("✅ Login Response:", userData);
+      console.log("✅ Login response:", userData);
 
       if (!userData?.token) {
         setMessage({ text: "Login failed — no token received", type: "error" });
         return;
       }
 
+      // ✅ Save to localStorage
       localStorage.setItem("token", userData.token);
       localStorage.setItem("userData", JSON.stringify(userData));
 
       setMessage({ text: "Login successful! Redirecting...", type: "success" });
 
+      startTokenTimer();
       setTimeout(() => redirectUser(userData), 1000);
     } catch (err) {
       console.error("❌ Login error:", err?.response?.data || err.message || err);
@@ -80,7 +98,7 @@ export default function LoginPage() {
     }
   };
 
-  if (checkingAuth) return null; // ✅ Prevents flash/blink
+  if (checkingAuth) return null;
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row">
