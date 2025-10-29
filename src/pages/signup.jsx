@@ -34,31 +34,26 @@ export default function Signup() {
     setMessage({ text: "", type: "" });
 
     try {
-      // ✅ Send signup data (no JWT involved)
-      await axios.post(
+      // ✅ Send signup data
+      const res = await axios.post(
         `${API_URL}/api/auth/signup`,
         { ...formData, accountType },
         { timeout: 10000 }
       );
 
+      const userData = res.data;
       setMessage({ text: "Account created successfully!", type: "success" });
 
-      // ✅ Reset form after success
-      setFormData({
-        name: "",
-        email: "",
-        phoneno: "",
-        password: "",
-        description: "",
-        gender: "",
-        skills: "",
-        company: "",
-        designation: "",
-        companycategory: "",
-      });
+      // ✅ If backend returns token, store it immediately
+      if (userData.token) {
+        localStorage.setItem("token", userData.token);
+        localStorage.setItem("userData", JSON.stringify(userData));
 
-      // ✅ Redirect to login after short delay
-      setTimeout(() => router.push("/login"), 1200);
+        setTimeout(() => redirectUser(userData.accountType), 1000);
+      } else {
+        // Otherwise, redirect to login page
+        setTimeout(() => router.push("/login"), 1200);
+      }
     } catch (error) {
       console.error("Signup error (frontend):", error?.response?.data || error.message);
       setMessage({
@@ -67,6 +62,25 @@ export default function Signup() {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const redirectUser = (accountType) => {
+    switch (accountType) {
+      case "admin":
+        router.push("/dashboard");
+        break;
+      case "guest":
+        router.push("/dashboard");
+        break;
+      case "artist":
+        router.push("/artist/dashboard");
+        break;
+      case "professional":
+        router.push("/professional/dashboard");
+        break;
+      default:
+        router.push("/dashboard");
     }
   };
 

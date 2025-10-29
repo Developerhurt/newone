@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { motion } from "framer-motion";
@@ -11,8 +11,37 @@ export default function LoginPage() {
   const [message, setMessage] = useState({ text: "", type: "" });
   const [loading, setLoading] = useState(false);
 
-  // ✅ Use your deployed backend URL or fallback to localhost
+  // ✅ Use your deployed backend URL or fallback
   const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+
+  // ✅ Redirect if already logged in
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    const userData = localStorage.getItem("userData");
+    if (token && userData) {
+      const parsed = JSON.parse(userData);
+      redirectUser(parsed.accountType);
+    }
+  }, []);
+
+  const redirectUser = (accountType) => {
+    switch (accountType) {
+      case "admin":
+        router.push("/dashboard");
+        break;
+      case "guest":
+        router.push("/dashboard");
+        break;
+      case "artist":
+        router.push("/artist/dashboard");
+        break;
+      case "professional":
+        router.push("/professional/dashboard");
+        break;
+      default:
+        router.push("/dashboard");
+    }
+  };
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -20,32 +49,26 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      // ✅ Send simple login request — backend no longer uses JWT
-      const res = await axios.post(`${API_URL}/api/auth/login`, { email, password }, { timeout: 10000 });
+      // ✅ Send login request (backend now returns token)
+      const res = await axios.post(
+        `${API_URL}/api/auth/login`,
+        { email, password },
+        { timeout: 10000 }
+      );
+
       const userData = res.data;
-      console.log("Login Response:", res.data);
+      console.log("Login Response:", userData);
+
+      // ✅ Save token and user info
+      localStorage.setItem("token", userData.token);
+      localStorage.setItem("userData", JSON.stringify(userData));
 
       setMessage({ text: "Login successful! Redirecting...", type: "success" });
 
-      // ✅ Redirect user based on their account type
-      switch (userData.accountType) {
-        case "admin":
-          router.push("/dashboard");
-          break;
-        case "guest":
-          router.push("/dashboard");
-          break;
-        case "artist":
-          router.push("/artist/dashboard");
-          break;
-        case "professional":
-          router.push("/professional/dashboard");
-          break;
-        default:
-          router.push("/dashboard");
-      }
+      // ✅ Redirect based on account type
+      setTimeout(() => redirectUser(userData.accountType), 1200);
     } catch (err) {
-      console.error("Login error (frontend):", err?.response?.data || err.message || err);
+      console.error("Login error:", err?.response?.data || err.message || err);
       const errMsg = err.response?.data?.message || "Invalid email or password!";
       setMessage({ text: errMsg, type: "error" });
     } finally {
@@ -102,7 +125,11 @@ export default function LoginPage() {
           </div>
 
           {message.text && (
-            <p className={`text-sm ${message.type === "error" ? "text-red-500" : "text-green-600"}`}>
+            <p
+              className={`text-sm ${
+                message.type === "error" ? "text-red-500" : "text-green-600"
+              }`}
+            >
               {message.text}
             </p>
           )}
