@@ -10,21 +10,24 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState({ text: "", type: "" });
   const [loading, setLoading] = useState(false);
+  const [checkingAuth, setCheckingAuth] = useState(true); // ✅ Prevent flicker
 
-  // ✅ Use your deployed backend URL or fallback to localhost
   const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
-  // ✅ Redirect if already logged in
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    const userData = localStorage.getItem("userData");
-    if (token && userData) {
-      const parsed = JSON.parse(userData);
-      redirectUser(parsed);
+    // ✅ Only run client-side
+    if (typeof window !== "undefined") {
+      const token = localStorage.getItem("token");
+      const userData = localStorage.getItem("userData");
+      if (token && userData) {
+        const parsed = JSON.parse(userData);
+        // ✅ Wait a short delay to prevent router conflicts
+        setTimeout(() => redirectUser(parsed), 500);
+      }
     }
+    setCheckingAuth(false);
   }, []);
 
-  // ✅ Central redirect function
   const redirectUser = (userData) => {
     if (!userData) return;
     const { accountType } = userData;
@@ -53,13 +56,7 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      // ✅ Send login request (backend returns token)
-      const res = await axios.post(
-        `${API_URL}/api/auth/login`,
-        { email, password },
-        { timeout: 10000 }
-      );
-
+      const res = await axios.post(`${API_URL}/api/auth/login`, { email, password });
       const userData = res.data;
       console.log("✅ Login Response:", userData);
 
@@ -68,14 +65,12 @@ export default function LoginPage() {
         return;
       }
 
-      // ✅ Save token & user data
       localStorage.setItem("token", userData.token);
       localStorage.setItem("userData", JSON.stringify(userData));
 
       setMessage({ text: "Login successful! Redirecting...", type: "success" });
 
-      // ✅ Redirect after short delay
-      setTimeout(() => redirectUser(userData), 1200);
+      setTimeout(() => redirectUser(userData), 1000);
     } catch (err) {
       console.error("❌ Login error:", err?.response?.data || err.message || err);
       const errMsg = err.response?.data?.message || "Invalid email or password!";
@@ -85,9 +80,11 @@ export default function LoginPage() {
     }
   };
 
+  if (checkingAuth) return null; // ✅ Prevents flash/blink
+
   return (
     <div className="min-h-screen flex flex-col md:flex-row">
-      {/* Left animation section */}
+      {/* Left animation */}
       <motion.div
         className="md:w-1/2 flex items-center justify-center bg-gradient-to-br from-indigo-400 via-purple-400 to-pink-400"
         initial={{ opacity: 0 }}
@@ -101,7 +98,7 @@ export default function LoginPage() {
         />
       </motion.div>
 
-      {/* Right login form */}
+      {/* Right form */}
       <div className="md:w-1/2 flex items-center justify-center p-10 bg-white">
         <form onSubmit={handleLogin} className="w-full max-w-md space-y-6">
           <h1 className="text-4xl font-bold text-indigo-700">Welcome Back 👋</h1>
@@ -134,11 +131,7 @@ export default function LoginPage() {
           </div>
 
           {message.text && (
-            <p
-              className={`text-sm ${
-                message.type === "error" ? "text-red-500" : "text-green-600"
-              }`}
-            >
+            <p className={`text-sm ${message.type === "error" ? "text-red-500" : "text-green-600"}`}>
               {message.text}
             </p>
           )}
