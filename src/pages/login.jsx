@@ -8,33 +8,49 @@ export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [message, setMessage] = useState({ text: "", type: "" });
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    setError("");
+    setMessage({ text: "", type: "" });
     setLoading(true);
 
     try {
-      const res = await axios.post("http://localhost:5000/api/login", {
+      // Correct backend endpoint
+      const res = await axios.post(`${process.env.API_URL_BACKEND}/api/auth/login`, {
         email,
         password,
       });
 
-      const { accountType } = res.data;
+      const userData = res.data;
 
-      if (accountType === "artist") router.push("/artist-dashboard");
-      else if (accountType === "professional")
-        router.push("/professional-dashboard");
-      else if (accountType === "guest") router.push("/guest-dashboard");
-      else if (accountType === "admin") router.push("/admin-dashboard");
-      else router.push("/");
+      // ✅ Store token & user data in localStorage
+      localStorage.setItem("authToken", userData.token || "mock-token");
+      localStorage.setItem("userData", JSON.stringify(userData));
 
+      setMessage({ text: "Login successful! Redirecting...", type: "success" });
+
+      // ✅ Redirect by accountType
+      switch (userData.accountType) {
+        case "admin":
+          router.push("/dashboard");
+          break;
+        case "guest":
+          router.push("/account");
+          break;
+        case "artist":
+          router.push("/artist/dashboard");
+          break;
+        case "professional":
+          router.push("/professional/dashboard");
+          break;
+        default:
+          router.push("/dashboard");
+      }
     } catch (err) {
-      setError(
-        err.response?.data?.message || "Something went wrong. Please try again."
-      );
+      const errMsg = err.response?.data?.message || "Invalid email or password!";
+      setMessage({ text: errMsg, type: "error" });
     } finally {
       setLoading(false);
     }
@@ -62,7 +78,9 @@ export default function LoginPage() {
           onSubmit={handleLogin}
           className="w-full max-w-md space-y-6 animate-fadeIn"
         >
-          <h1 className="text-4xl font-bold text-indigo-700">Welcome Back 👋</h1>
+          <h1 className="text-4xl font-bold text-indigo-700">
+            Welcome Back 👋
+          </h1>
           <p className="text-gray-600 mb-6">
             Login to access your personalized dashboard.
           </p>
@@ -70,7 +88,9 @@ export default function LoginPage() {
           {/* Email + Password */}
           <div className="grid grid-cols-1 gap-5">
             <div>
-              <label className="block text-gray-700 font-semibold mb-2">Email</label>
+              <label className="block text-gray-700 font-semibold mb-2">
+                Email
+              </label>
               <input
                 type="email"
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-400 outline-none"
@@ -82,7 +102,9 @@ export default function LoginPage() {
             </div>
 
             <div>
-              <label className="block text-gray-700 font-semibold mb-2">Password</label>
+              <label className="block text-gray-700 font-semibold mb-2">
+                Password
+              </label>
               <input
                 type="password"
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-400 outline-none"
@@ -94,8 +116,16 @@ export default function LoginPage() {
             </div>
           </div>
 
-          {/* Error Message */}
-          {error && <p className="text-red-500 text-sm">{error}</p>}
+          {/* Message */}
+          {message.text && (
+            <p
+              className={`text-sm ${
+                message.type === "error" ? "text-red-500" : "text-green-600"
+              }`}
+            >
+              {message.text}
+            </p>
+          )}
 
           {/* Buttons */}
           <div className="space-y-3">

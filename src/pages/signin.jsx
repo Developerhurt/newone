@@ -1,34 +1,52 @@
-import React, { useState } from 'react';
-import { useRouter } from 'next/router';
+import React, { useState } from "react";
+import { useRouter } from "next/router";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Mail, Lock, LogIn } from 'lucide-react';
-import credentials from '@/lib/credentials';
+import { Mail, Lock, LogIn } from "lucide-react";
+import axios from "axios";
 
-export default function SigninPage() {
+export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [message, setMessage] = useState({ text: "", type: "" });
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    setError('');
+    setMessage({ text: "", type: "" });
     setLoading(true);
-    try {
-      const users = Object.values(credentials);
-      const matched = users.find((u) => u.email === email && u.password === password);
-      if (!matched) {
-        setError('Invalid email or password');
-        setLoading(false);
-        return;
+
+    try {   
+      const res = await axios.post("http://localhost:5000/api/auth/login", { email, password });
+
+      const userData = res.data;
+      localStorage.setItem("authToken", "mock-token"); // or JWT from backend
+      localStorage.setItem("userData", JSON.stringify(userData));
+
+      setMessage({ text: "Login successful! Redirecting...", type: "success" });
+
+      // Redirect based on accountType
+      switch (userData.accountType) {
+        case "admin":
+          router.push("/admin/dashboard");
+          break;
+        case "guest":
+          router.push("/guest/dashboard");
+          break;
+        case "artist":
+          router.push("/artist/dashboard");
+          break;
+        case "professional":
+          router.push("/professional/dashboard");
+          break;
+        default:
+          router.push("/dashboard");
       }
-      localStorage.setItem('authToken', 'mock-token');
-      localStorage.setItem('userType', matched.userType);
-      localStorage.setItem('userData', JSON.stringify(matched));
-      router.push('/dashboard');
+    } catch (err) {
+      const errMsg = err.response?.data?.message || "Something went wrong!";
+      setMessage({ text: errMsg, type: "error" });
     } finally {
       setLoading(false);
     }
@@ -73,22 +91,26 @@ export default function SigninPage() {
               </div>
             </div>
 
-            {error && <p className="text-sm text-red-600">{error}</p>}
+            {message.text && (
+              <p className={`text-sm ${message.type === "error" ? "text-red-600" : "text-green-600"}`}>
+                {message.text}
+              </p>
+            )}
 
             <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white" disabled={loading}>
               <LogIn className="h-4 w-4 mr-2" />
-              {loading ? 'Signing in...' : 'Sign In'}
+              {loading ? "Signing in..." : "Sign In"}
             </Button>
           </form>
 
           <p className="mt-4 text-sm text-slate-600">
             Don’t have an account?
-            <button className="ml-1 text-blue-600 hover:underline" onClick={() => router.push('/register')}>Register</button>
+            <button className="ml-1 text-blue-600 hover:underline" onClick={() => router.push("/register")}>
+              Register
+            </button>
           </p>
         </CardContent>
       </Card>
     </div>
   );
 }
-
-

@@ -1,11 +1,15 @@
-import React, { useState } from "react";
+"use client";
+
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
+import { useRouter } from "next/navigation";
 
-export default function signup() {
+export default function Signup() {
+  const router = useRouter();
   const [accountType, setAccountType] = useState("artist");
   const [loading, setLoading] = useState(false);
-  const [successMsg, setSuccessMsg] = useState("");
+  const [message, setMessage] = useState({ text: "", type: "" });
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -25,13 +29,17 @@ export default function signup() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setSuccessMsg("");
+    setMessage({ text: "", type: "" });
+
     try {
-      await axios.post("http://localhost:5000/api/users/register", {
+      await axios.post(`${process.env.API_URL_BACKEND}/api/auth/signup`, {
         ...formData,
         accountType,
       });
-      setSuccessMsg("Account created successfully!");
+
+      setMessage({ text: "✅ Account created successfully!", type: "success" });
+
+      // Reset form
       setFormData({
         name: "",
         email: "",
@@ -44,8 +52,14 @@ export default function signup() {
         designation: "",
         companycategory: "",
       });
+
+      // Redirect to login page after short delay
+      setTimeout(() => router.push("/login"), 1500);
     } catch (error) {
-      setSuccessMsg(" Something went wrong!");
+      setMessage({
+        text: error.response?.data?.message || "❌ Something went wrong!",
+        type: "error",
+      });
     } finally {
       setLoading(false);
     }
@@ -224,28 +238,41 @@ export default function signup() {
               {loading ? "Creating..." : "Sign Up"}
             </motion.button>
 
-            {successMsg && (
-              <p className="text-green-400 text-center mt-3">{successMsg}</p>
+            {message.text && (
+              <p
+                className={`text-center mt-3 font-medium ${
+                  message.type === "error"
+                    ? "text-red-400"
+                    : "text-green-400"
+                }`}
+              >
+                {message.text}
+              </p>
             )}
           </motion.form>
         </AnimatePresence>
+
+        {/* Already have account? */}
+        <p className="text-sm mt-4 text-center text-gray-400">
+          Already have an account?{" "}
+          <span
+            onClick={() => router.push("/login")}
+            className="text-blue-400 cursor-pointer hover:underline"
+          >
+            Login here
+          </span>
+        </p>
       </div>
 
       {/* Right Side - Animated Background */}
       <div className="hidden md:flex flex-1 items-center justify-center relative overflow-hidden">
         <motion.div
-          animate={{
-            y: [0, -30, 0],
-            rotate: [0, 10, 0],
-          }}
+          animate={{ y: [0, -30, 0], rotate: [0, 10, 0] }}
           transition={{ repeat: Infinity, duration: 6 }}
           className="absolute w-96 h-96 bg-blue-500/20 rounded-full blur-3xl"
         ></motion.div>
         <motion.div
-          animate={{
-            y: [-20, 20, -20],
-            rotate: [10, 0, 10],
-          }}
+          animate={{ y: [-20, 20, -20], rotate: [10, 0, 10] }}
           transition={{ repeat: Infinity, duration: 5 }}
           className="absolute w-80 h-80 bg-pink-500/10 rounded-full blur-3xl"
         ></motion.div>
@@ -256,7 +283,7 @@ export default function signup() {
           transition={{ duration: 1 }}
           className="text-5xl font-bold text-center z-10"
         >
-          Join Our <span className="text-blue-400">Creative</span> World 
+          Join Our <span className="text-blue-400">Creative</span> World
         </motion.h2>
       </div>
     </div>
