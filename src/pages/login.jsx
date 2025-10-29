@@ -18,7 +18,7 @@ export default function LoginPage() {
 
     try {
       // Correct backend endpoint
-      const res = await axios.post(`${process.env.API_URL_BACKEND}/api/auth/login`, {
+      const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`, {
         email,
         password,
       });

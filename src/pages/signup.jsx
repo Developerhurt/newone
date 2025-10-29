@@ -32,7 +32,7 @@ export default function Signup() {
     setMessage({ text: "", type: "" });
 
     try {
-      await axios.post(`${process.env.API_URL_BACKEND}/api/auth/signup`, {
+      await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/signup`, {
         ...formData,
         accountType,
       });
