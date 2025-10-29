@@ -22,12 +22,9 @@ export default function LoginPage() {
       );
       const userData = res.data;
 
-      localStorage.setItem("authToken", userData.token); // Save JWT
-      localStorage.setItem("userData", JSON.stringify(userData));
-
       setMessage({ text: "Login successful! Redirecting...", type: "success" });
 
-      // Redirect based on role
+      // Redirect based on role (no JWT required)
       switch (userData.accountType) {
         case "admin":
           router.push("/dashboard");
@@ -51,6 +48,7 @@ export default function LoginPage() {
       setLoading(false);
     }
   };
+
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row">

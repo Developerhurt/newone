@@ -6,7 +6,7 @@ import axios from "axios";
 import { useRouter } from "next/navigation";
 
 export default function Signup() {
-  const router = useRouter();
+ const router = useRouter();
   const [accountType, setAccountType] = useState("artist");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ text: "", type: "" });
@@ -37,9 +37,8 @@ export default function Signup() {
         accountType,
       });
 
-      setMessage({ text: " Account created successfully!", type: "success" });
+      setMessage({ text: "Account created successfully!", type: "success" });
 
-      // Reset form
       setFormData({
         name: "",
         email: "",
@@ -53,11 +52,10 @@ export default function Signup() {
         companycategory: "",
       });
 
-      // Redirect to login page after short delay
       setTimeout(() => router.push("/login"), 1500);
     } catch (error) {
       setMessage({
-        text: error.response?.data?.message || " Something went wrong!",
+        text: error.response?.data?.message || "Something went wrong!",
         type: "error",
       });
     } finally {
