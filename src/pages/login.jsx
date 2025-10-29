@@ -23,6 +23,7 @@ export default function LoginPage() {
       // ✅ Send simple login request — backend no longer uses JWT
       const res = await axios.post(`${API_URL}/api/auth/login`, { email, password }, { timeout: 10000 });
       const userData = res.data;
+      console.log("Login Response:", res.data);
 
       setMessage({ text: "Login successful! Redirecting...", type: "success" });
 
