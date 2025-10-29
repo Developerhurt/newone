@@ -37,7 +37,7 @@ export default function Signup() {
         accountType,
       });
 
-      setMessage({ text: "✅ Account created successfully!", type: "success" });
+      setMessage({ text: " Account created successfully!", type: "success" });
 
       // Reset form
       setFormData({
@@ -57,7 +57,7 @@ export default function Signup() {
       setTimeout(() => router.push("/login"), 1500);
     } catch (error) {
       setMessage({
-        text: error.response?.data?.message || "❌ Something went wrong!",
+        text: error.response?.data?.message || " Something went wrong!",
         type: "error",
       });
     } finally {

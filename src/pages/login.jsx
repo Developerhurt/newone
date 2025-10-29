@@ -1,8 +1,8 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
 import axios from "axios";
+import { motion } from "framer-motion";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -15,29 +15,25 @@ export default function LoginPage() {
     e.preventDefault();
     setMessage({ text: "", type: "" });
     setLoading(true);
-
     try {
-      // Correct backend endpoint
-      const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`, {
-        email,
-        password,
-      });
-
+      const res = await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`,
+        { email, password }
+      );
       const userData = res.data;
 
-      // ✅ Store token & user data in localStorage
-      localStorage.setItem("authToken", userData.token || "mock-token");
+      localStorage.setItem("authToken", userData.token); // Save JWT
       localStorage.setItem("userData", JSON.stringify(userData));
 
       setMessage({ text: "Login successful! Redirecting...", type: "success" });
 
-      // ✅ Redirect by accountType
+      // Redirect based on role
       switch (userData.accountType) {
         case "admin":
           router.push("/dashboard");
           break;
         case "guest":
-          router.push("/account");
+          router.push("/");
           break;
         case "artist":
           router.push("/artist/dashboard");
@@ -71,26 +67,14 @@ export default function LoginPage() {
           transition={{ repeat: Infinity, duration: 2 }}
         />
       </motion.div>
-
       {/* Right Side Form */}
       <div className="md:w-1/2 flex items-center justify-center p-10 bg-white">
-        <form
-          onSubmit={handleLogin}
-          className="w-full max-w-md space-y-6 animate-fadeIn"
-        >
-          <h1 className="text-4xl font-bold text-indigo-700">
-            Welcome Back 👋
-          </h1>
-          <p className="text-gray-600 mb-6">
-            Login to access your personalized dashboard.
-          </p>
-
-          {/* Email + Password */}
+        <form onSubmit={handleLogin} className="w-full max-w-md space-y-6">
+          <h1 className="text-4xl font-bold text-indigo-700">Welcome Back 👋</h1>
+          <p className="text-gray-600 mb-6">Login to access your personalized dashboard.</p>
           <div className="grid grid-cols-1 gap-5">
             <div>
-              <label className="block text-gray-700 font-semibold mb-2">
-                Email
-              </label>
+              <label className="block text-gray-700 font-semibold mb-2">Email</label>
               <input
                 type="email"
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-400 outline-none"
@@ -100,11 +84,8 @@ export default function LoginPage() {
                 required
               />
             </div>
-
             <div>
-              <label className="block text-gray-700 font-semibold mb-2">
-                Password
-              </label>
+              <label className="block text-gray-700 font-semibold mb-2">Password</label>
               <input
                 type="password"
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-400 outline-none"
@@ -115,7 +96,6 @@ export default function LoginPage() {
               />
             </div>
           </div>
-
           {/* Message */}
           {message.text && (
             <p
@@ -126,7 +106,6 @@ export default function LoginPage() {
               {message.text}
             </p>
           )}
-
           {/* Buttons */}
           <div className="space-y-3">
             <button
@@ -136,7 +115,6 @@ export default function LoginPage() {
             >
               {loading ? "Logging in..." : "Login"}
             </button>
-
             <button
               type="button"
               onClick={() => router.push("/")}
@@ -145,14 +123,10 @@ export default function LoginPage() {
               ← Return to Landing Page
             </button>
           </div>
-
           {/* Signup Link */}
           <p className="text-gray-500 text-center mt-4">
             Don’t have an account?{" "}
-            <a
-              href="/signup"
-              className="text-indigo-600 hover:underline font-medium"
-            >
+            <a href="/signup" className="text-indigo-600 hover:underline font-medium">
               Sign up
             </a>
           </p>
