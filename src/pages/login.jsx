@@ -11,7 +11,7 @@ export default function LoginPage() {
   const [message, setMessage] = useState({ text: "", type: "" });
   const [loading, setLoading] = useState(false);
 
-  // ✅ Use your deployed backend URL or fallback
+  // ✅ Use your deployed backend URL or fallback to localhost
   const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
   // ✅ Redirect if already logged in
@@ -20,11 +20,15 @@ export default function LoginPage() {
     const userData = localStorage.getItem("userData");
     if (token && userData) {
       const parsed = JSON.parse(userData);
-      redirectUser(parsed.accountType);
+      redirectUser(parsed);
     }
   }, []);
 
-  const redirectUser = (accountType) => {
+  // ✅ Central redirect function
+  const redirectUser = (userData) => {
+    if (!userData) return;
+    const { accountType } = userData;
+
     switch (accountType) {
       case "admin":
         router.push("/dashboard");
@@ -49,7 +53,7 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      // ✅ Send login request (backend now returns token)
+      // ✅ Send login request (backend returns token)
       const res = await axios.post(
         `${API_URL}/api/auth/login`,
         { email, password },
@@ -57,18 +61,23 @@ export default function LoginPage() {
       );
 
       const userData = res.data;
-      console.log("Login Response:", userData);
+      console.log("✅ Login Response:", userData);
 
-      // ✅ Save token and user info
+      if (!userData?.token) {
+        setMessage({ text: "Login failed — no token received", type: "error" });
+        return;
+      }
+
+      // ✅ Save token & user data
       localStorage.setItem("token", userData.token);
       localStorage.setItem("userData", JSON.stringify(userData));
 
       setMessage({ text: "Login successful! Redirecting...", type: "success" });
 
-      // ✅ Redirect based on account type
-      setTimeout(() => redirectUser(userData.accountType), 1200);
+      // ✅ Redirect after short delay
+      setTimeout(() => redirectUser(userData), 1200);
     } catch (err) {
-      console.error("Login error:", err?.response?.data || err.message || err);
+      console.error("❌ Login error:", err?.response?.data || err.message || err);
       const errMsg = err.response?.data?.message || "Invalid email or password!";
       setMessage({ text: errMsg, type: "error" });
     } finally {
