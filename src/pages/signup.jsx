@@ -5,11 +5,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 
-export default function Signup() {
+export default function SignupPage() {
   const router = useRouter();
   const [accountType, setAccountType] = useState("artist");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ text: "", type: "" });
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -23,7 +24,7 @@ export default function Signup() {
     companycategory: "",
   });
 
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+  const API_URL = "https://newonebackend-1.onrender.com";
 
   const handleChange = (e) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -34,53 +35,25 @@ export default function Signup() {
     setMessage({ text: "", type: "" });
 
     try {
-      // ✅ Send signup data
-      const res = await axios.post(
-        `${API_URL}/api/auth/signup`,
-        { ...formData, accountType },
-        { timeout: 10000 }
-      );
+      const res = await axios.post(`${API_URL}/api/auth/signup`, { ...formData, accountType });
+      const userData = res.data.user;
 
-      const userData = res.data;
-      setMessage({ text: "Account created successfully!", type: "success" });
-
-      // ✅ If backend returns token, store it immediately
-      if (userData.token) {
-        localStorage.setItem("token", userData.token);
-        localStorage.setItem("userData", JSON.stringify(userData));
-
-        setTimeout(() => redirectUser(userData.accountType), 1000);
-      } else {
-        // Otherwise, redirect to login page
-        setTimeout(() => router.push("/login"), 1200);
+      if (!userData) {
+        setMessage({ text: "Signup failed — no user data received", type: "error" });
+        return;
       }
+
+      setMessage({ text: "Account created successfully!", type: "success" });
+      localStorage.setItem("userData", JSON.stringify(userData));
+
+      setTimeout(() => router.push("/login"), 1200);
     } catch (error) {
-      console.error("Signup error (frontend):", error?.response?.data || error.message);
       setMessage({
         text: error.response?.data?.message || "Something went wrong!",
         type: "error",
       });
     } finally {
       setLoading(false);
-    }
-  };
-
-  const redirectUser = (accountType) => {
-    switch (accountType) {
-      case "admin":
-        router.push("/dashboard");
-        break;
-      case "guest":
-        router.push("/dashboard");
-        break;
-      case "artist":
-        router.push("/artist/dashboard");
-        break;
-      case "professional":
-        router.push("/professional/dashboard");
-        break;
-      default:
-        router.push("/dashboard");
     }
   };
 
@@ -92,13 +65,11 @@ export default function Signup() {
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white">
-      {/* Left Side - Signup Form */}
+      {/* Left Form Side */}
       <div className="flex-1 flex flex-col justify-center px-8 md:px-16 py-10">
-        <h1 className="text-4xl font-bold mb-8 text-blue-400">
-          Create Your Account
-        </h1>
+        <h1 className="text-4xl font-bold mb-8 text-blue-400">Create Your Account</h1>
 
-        {/* Account Type Selector */}
+        {/* Account Type Buttons */}
         <div className="flex gap-3 mb-8 flex-wrap">
           {["artist", "professional", "guest", "admin"].map((type) => (
             <motion.button
@@ -130,7 +101,6 @@ export default function Signup() {
             className="space-y-4"
           >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Basic Info */}
               <div>
                 <label className="block mb-1">Full Name</label>
                 <input
@@ -235,7 +205,6 @@ export default function Signup() {
                 </>
               )}
 
-              {/* Common Description Field */}
               <div className="md:col-span-2">
                 <label className="block mb-1">Description</label>
                 <textarea
@@ -269,7 +238,6 @@ export default function Signup() {
           </motion.form>
         </AnimatePresence>
 
-        {/* Redirect to Login */}
         <p className="text-sm mt-4 text-center text-gray-400">
           Already have an account?{" "}
           <span
@@ -281,19 +249,18 @@ export default function Signup() {
         </p>
       </div>
 
-      {/* Right Side Animated Visuals */}
+      {/* Right Animated Visuals */}
       <div className="hidden md:flex flex-1 items-center justify-center relative overflow-hidden">
         <motion.div
           animate={{ y: [0, -30, 0], rotate: [0, 10, 0] }}
           transition={{ repeat: Infinity, duration: 6 }}
           className="absolute w-96 h-96 bg-blue-500/20 rounded-full blur-3xl"
-        ></motion.div>
+        />
         <motion.div
           animate={{ y: [-20, 20, -20], rotate: [10, 0, 10] }}
           transition={{ repeat: Infinity, duration: 5 }}
           className="absolute w-80 h-80 bg-pink-500/10 rounded-full blur-3xl"
-        ></motion.div>
-
+        />
         <motion.h2
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}

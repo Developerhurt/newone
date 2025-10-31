@@ -1,5 +1,6 @@
 "use client";
-import { useState, useEffect } from "react";
+
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { motion } from "framer-motion";
@@ -10,56 +11,26 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState({ text: "", type: "" });
   const [loading, setLoading] = useState(false);
-  const [checkingAuth, setCheckingAuth] = useState(true);
 
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+  // 🔗 Backend URL
+  const API_URL = "https://newonebackend-1.onrender.com";
 
-  // ✅ Auto logout after 15 seconds
-  const startTokenTimer = () => {
-    setTimeout(() => {
-      localStorage.removeItem("token");
-      localStorage.removeItem("userData");
-      alert("⚠️ Session expired. Please log in again.");
-      router.push("/login");
-    }, 15000);
-  };
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const token = localStorage.getItem("token");
-      const userData = localStorage.getItem("userData");
-
-      if (token && userData) {
-        const parsed = JSON.parse(userData);
-        console.log("🔍 Loaded user:", parsed);
-        startTokenTimer();
-        setTimeout(() => redirectUser(parsed), 500);
-      }
-    }
-    setCheckingAuth(false);
-  }, []);
-
-  // ✅ Correct role-based redirect
+  // ✅ Redirect user based on accountType
   const redirectUser = (userData) => {
-    if (!userData) return;
+    if (!userData?.accountType) return router.push("/dashboard");
 
-    // accountType is inside userData.user
-    const accountType = userData.user?.accountType?.toLowerCase() || "";
-
-    console.log("➡️ Redirecting account type:", accountType);
-
-    switch (accountType) {
-      case "admin":
-        router.push("/admin/dashboard");
-        break;
-      case "guest":
-        router.push("/guest/dashboard");
-        break;
+    switch (userData.accountType) {
       case "artist":
-        router.push("/artist/dashboard");
+        router.push("/ar/dashboard");
         break;
       case "professional":
         router.push("/professional/dashboard");
+        break;
+      case "admin":
+        router.push("/dashboard");
+        break;
+      case "guest":
+        router.push("/artist/guest-dashboard");
         break;
       default:
         router.push("/dashboard");
@@ -73,24 +44,21 @@ export default function LoginPage() {
 
     try {
       const res = await axios.post(`${API_URL}/api/auth/login`, { email, password });
-      const userData = res.data;
-      console.log("✅ Login response:", userData);
 
-      if (!userData?.token) {
-        setMessage({ text: "Login failed — no token received", type: "error" });
+      const { token, user } = res.data;
+      if (!token || !user) {
+        setMessage({ text: "Invalid response from server!", type: "error" });
         return;
       }
 
-      // ✅ Save to localStorage
-      localStorage.setItem("token", userData.token);
-      localStorage.setItem("userData", JSON.stringify(userData));
+      // ✅ Save token & user to localStorage
+      localStorage.setItem("token", token);
+      localStorage.setItem("userData", JSON.stringify(user));
 
       setMessage({ text: "Login successful! Redirecting...", type: "success" });
 
-      startTokenTimer();
-      setTimeout(() => redirectUser(userData), 1000);
+      setTimeout(() => redirectUser(user), 1000);
     } catch (err) {
-      console.error("❌ Login error:", err?.response?.data || err.message || err);
       const errMsg = err.response?.data?.message || "Invalid email or password!";
       setMessage({ text: errMsg, type: "error" });
     } finally {
@@ -98,11 +66,9 @@ export default function LoginPage() {
     }
   };
 
-  if (checkingAuth) return null;
-
   return (
     <div className="min-h-screen flex flex-col md:flex-row">
-      {/* Left animation */}
+      {/* Left Animation */}
       <motion.div
         className="md:w-1/2 flex items-center justify-center bg-gradient-to-br from-indigo-400 via-purple-400 to-pink-400"
         initial={{ opacity: 0 }}
@@ -116,13 +82,13 @@ export default function LoginPage() {
         />
       </motion.div>
 
-      {/* Right form */}
+      {/* Right Form */}
       <div className="md:w-1/2 flex items-center justify-center p-10 bg-white">
         <form onSubmit={handleLogin} className="w-full max-w-md space-y-6">
           <h1 className="text-4xl font-bold text-indigo-700">Welcome Back 👋</h1>
           <p className="text-gray-600 mb-6">Login to access your personalized dashboard.</p>
 
-          <div className="grid grid-cols-1 gap-5">
+          <div className="space-y-4">
             <div>
               <label className="block text-gray-700 font-semibold mb-2">Email</label>
               <input
@@ -149,7 +115,11 @@ export default function LoginPage() {
           </div>
 
           {message.text && (
-            <p className={`text-sm ${message.type === "error" ? "text-red-500" : "text-green-600"}`}>
+            <p
+              className={`text-sm ${
+                message.type === "error" ? "text-red-500" : "text-green-600"
+              }`}
+            >
               {message.text}
             </p>
           )}
