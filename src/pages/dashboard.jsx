@@ -5,6 +5,8 @@ import { Search, UsersRound, Building2, CalendarDays, ArrowRight, Eye, Briefcase
 import { Progress } from "@/components/ui/progress"
 import { Switch } from "@/components/ui/switch"
 import { Badge } from "@/components/ui/badge"
+import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from "recharts"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import {
@@ -14,6 +16,48 @@ import {
 } from "@/components/ui/sidebar"
 
 export default function Page() {
+
+  const router = useRouter();
+  const [authChecked, setAuthChecked] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    // Wait until window is available
+    if (typeof window !== "undefined") {
+      const token = localStorage.getItem("token");
+      console.log("🔹 Token found in localStorage:", token);
+
+      if (token && token.trim() !== "") {
+        setIsAuthenticated(true);
+      } else {
+        setIsAuthenticated(false);
+      }
+
+      // Mark that auth check is complete
+      setAuthChecked(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    // Only redirect *after* we finish checking authentication
+    if (authChecked && !isAuthenticated) {
+      console.log("🔸 Redirecting: No valid token found");
+      router.replace("/login");
+    }
+  }, [authChecked, isAuthenticated, router]);
+
+  if (!authChecked) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <p className="text-gray-600 text-lg">Checking authentication...</p>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    // While redirecting, avoid flickering
+    return null;
+  }
   return (
     <SidebarProvider>
       <AppSidebar />

@@ -2,15 +2,13 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import axios from "axios";
 import { useRouter } from "next/navigation";
 
-export default function SignupPage() {
+export default function Signup() {
   const router = useRouter();
   const [accountType, setAccountType] = useState("artist");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ text: "", type: "" });
-
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -24,34 +22,34 @@ export default function SignupPage() {
     companycategory: "",
   });
 
-  const API_URL = "https://newonebackend-1.onrender.com";
-
   const handleChange = (e) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
 
+  // ✅ UPDATED: Backend-connected signup
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setMessage({ text: "", type: "" });
 
     try {
-      const res = await axios.post(`${API_URL}/api/auth/signup`, { ...formData, accountType });
-      const userData = res.data.user;
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/signup`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...formData, accountType }),
+    });
 
-      if (!userData) {
-        setMessage({ text: "Signup failed — no user data received", type: "error" });
-        return;
+      const data = await res.json();
+
+      if (res.ok) {
+        setMessage({ text: data.message || "Account created successfully 🎉", type: "success" });
+        console.log("✅ Signup Success:", { ...formData, accountType });
+        setTimeout(() => router.push("/login"), 1500);
+      } else {
+        setMessage({ text: data.message || "Signup failed!", type: "error" });
       }
-
-      setMessage({ text: "Account created successfully!", type: "success" });
-      localStorage.setItem("userData", JSON.stringify(userData));
-
-      setTimeout(() => router.push("/login"), 1200);
     } catch (error) {
-      setMessage({
-        text: error.response?.data?.message || "Something went wrong!",
-        type: "error",
-      });
+      console.error("Signup error:", error);
+      setMessage({ text: "Server error. Please try again.", type: "error" });
     } finally {
       setLoading(false);
     }
@@ -65,11 +63,11 @@ export default function SignupPage() {
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white">
-      {/* Left Form Side */}
+      {/* Left Side - Signup Form */}
       <div className="flex-1 flex flex-col justify-center px-8 md:px-16 py-10">
         <h1 className="text-4xl font-bold mb-8 text-blue-400">Create Your Account</h1>
 
-        {/* Account Type Buttons */}
+        {/* Account Type Selector */}
         <div className="flex gap-3 mb-8 flex-wrap">
           {["artist", "professional", "guest", "admin"].map((type) => (
             <motion.button
@@ -205,6 +203,7 @@ export default function SignupPage() {
                 </>
               )}
 
+              {/* Common Description Field */}
               <div className="md:col-span-2">
                 <label className="block mb-1">Description</label>
                 <textarea
@@ -238,6 +237,7 @@ export default function SignupPage() {
           </motion.form>
         </AnimatePresence>
 
+        {/* Redirect to Login */}
         <p className="text-sm mt-4 text-center text-gray-400">
           Already have an account?{" "}
           <span
@@ -249,7 +249,7 @@ export default function SignupPage() {
         </p>
       </div>
 
-      {/* Right Animated Visuals */}
+      {/* Right Side Animated Visuals */}
       <div className="hidden md:flex flex-1 items-center justify-center relative overflow-hidden">
         <motion.div
           animate={{ y: [0, -30, 0], rotate: [0, 10, 0] }}

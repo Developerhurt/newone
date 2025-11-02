@@ -1,66 +1,60 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
-import axios from "axios";
 import { motion } from "framer-motion";
+import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [message, setMessage] = useState({ text: "", type: "" });
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-
-  // 🔗 Backend URL
-  const API_URL = "https://newonebackend-1.onrender.com";
-
-  // ✅ Redirect user based on accountType
-  const redirectUser = (userData) => {
-    if (!userData?.accountType) return router.push("/dashboard");
-
-    switch (userData.accountType) {
-      case "artist":
-        router.push("/ar/dashboard");
-        break;
-      case "professional":
-        router.push("/professional/dashboard");
-        break;
-      case "admin":
-        router.push("/dashboard");
-        break;
-      case "guest":
-        router.push("/artist/guest-dashboard");
-        break;
-      default:
-        router.push("/dashboard");
-    }
-  };
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    setMessage({ text: "", type: "" });
+    setError("");
     setLoading(true);
 
     try {
-      const res = await axios.post(`${API_URL}/api/auth/login`, { email, password });
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password }),
+        }
+      );
 
-      const { token, user } = res.data;
-      if (!token || !user) {
-        setMessage({ text: "Invalid response from server!", type: "error" });
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.message || "Invalid credentials");
+        setLoading(false);
         return;
       }
 
-      // ✅ Save token & user to localStorage
-      localStorage.setItem("token", token);
-      localStorage.setItem("userData", JSON.stringify(user));
+      // ✅ Save token and user details
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
 
-      setMessage({ text: "Login successful! Redirecting...", type: "success" });
-
-      setTimeout(() => redirectUser(user), 1000);
+      // ✅ Small delay to ensure data is stored before redirect
+      setTimeout(() => {
+        if (data.user.role === "admin") {
+          router.push("/dashboard");
+        } else if (data.user.role === "artist") {
+          router.push("/artist-dashboard");
+        } else if (data.user.role === "professional") {
+          router.push("/professional-dashboard");
+        } else if (data.user.role === "guest") {
+          router.push("/guest-dashboard");
+        } else {
+          router.push("/");
+        }
+      }, 500);
     } catch (err) {
-      const errMsg = err.response?.data?.message || "Invalid email or password!";
-      setMessage({ text: errMsg, type: "error" });
+      console.error("Login error:", err);
+      setError("Server error. Please try again later.");
     } finally {
       setLoading(false);
     }
@@ -68,7 +62,7 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row">
-      {/* Left Animation */}
+      {/* Left animation */}
       <motion.div
         className="md:w-1/2 flex items-center justify-center bg-gradient-to-br from-indigo-400 via-purple-400 to-pink-400"
         initial={{ opacity: 0 }}
@@ -82,15 +76,19 @@ export default function LoginPage() {
         />
       </motion.div>
 
-      {/* Right Form */}
+      {/* Right form */}
       <div className="md:w-1/2 flex items-center justify-center p-10 bg-white">
         <form onSubmit={handleLogin} className="w-full max-w-md space-y-6">
           <h1 className="text-4xl font-bold text-indigo-700">Welcome Back 👋</h1>
-          <p className="text-gray-600 mb-6">Login to access your personalized dashboard.</p>
+          <p className="text-gray-600 mb-6">
+            Login to access your personalized dashboard.
+          </p>
 
           <div className="space-y-4">
             <div>
-              <label className="block text-gray-700 font-semibold mb-2">Email</label>
+              <label className="block text-gray-700 font-semibold mb-2">
+                Email
+              </label>
               <input
                 type="email"
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-400 outline-none"
@@ -102,7 +100,9 @@ export default function LoginPage() {
             </div>
 
             <div>
-              <label className="block text-gray-700 font-semibold mb-2">Password</label>
+              <label className="block text-gray-700 font-semibold mb-2">
+                Password
+              </label>
               <input
                 type="password"
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-400 outline-none"
@@ -114,15 +114,7 @@ export default function LoginPage() {
             </div>
           </div>
 
-          {message.text && (
-            <p
-              className={`text-sm ${
-                message.type === "error" ? "text-red-500" : "text-green-600"
-              }`}
-            >
-              {message.text}
-            </p>
-          )}
+          {error && <p className="text-red-500 text-center">{error}</p>}
 
           <div className="space-y-3">
             <button
@@ -144,7 +136,10 @@ export default function LoginPage() {
 
           <p className="text-gray-500 text-center mt-4">
             Don’t have an account?{" "}
-            <a href="/signup" className="text-indigo-600 hover:underline font-medium">
+            <a
+              href="/signup"
+              className="text-indigo-600 hover:underline font-medium"
+            >
               Sign up
             </a>
           </p>
